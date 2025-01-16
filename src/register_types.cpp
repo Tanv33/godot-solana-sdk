@@ -29,7 +29,8 @@
 #include "rpc_multi_http_request_client.hpp"
 #include "address_lookup_table.hpp"
 #include "shdwdrive.hpp"
-#include "honeycomb.hpp"
+#include "honeycomb/honeycomb.hpp"
+#include "honeycomb/honeycomb_generated.hpp"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
@@ -37,6 +38,8 @@
 #include <godot_cpp/godot.hpp>
 #include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/engine.hpp>
+#include "honeycomb/types/index.hpp"
+#include "honeycomb/enums.hpp"
 
 #include "doc_data_godot-solana-sdk.gen.h"
 
@@ -106,6 +109,10 @@ void initialize_solana_sdk_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<RpcSingleHttpRequestClient>();
     ClassDB::register_class<RpcMultiHttpRequestClient>();
     ClassDB::register_class<HoneyComb>();
+    
+    REGISTER_HONEYCOMB_TYPES
+    REGISTER_HONEYCOMB_ENUM
+
 
     add_setting("solana_sdk/client/default_url", Variant::Type::STRING, "https://api.devnet.solana.com");
     add_setting("solana_sdk/client/default_http_port", Variant::Type::INT, 443);
