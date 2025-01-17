@@ -12,7 +12,7 @@ const USER_FILE_PATH = "res://user.json"
 
 func _ready():
 	await before_all()
-	#run_project_tests()
+	#await run_project_tests()
 	await run_user_tests()
 
 func before_all():

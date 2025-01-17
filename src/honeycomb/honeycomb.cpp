@@ -193,6 +193,10 @@ String HoneyComb::build() {
 			PackedInt32Array int_array = value;
 			args_values += "\"" + String(arg["name"]) + "\": " + JSON::stringify(int_array) + ",";
 			std::cout << "Serialized PackedInt32Array: " << JSON::stringify(int_array).ascii() << std::endl;
+		} else if (value.get_type() == Variant::BOOL) {
+			// Serialize Boolean as raw true/false without quotes
+			args_values += "\"" + String(arg["name"]) + "\": " + (value ? "true" : "false") + ",";
+			std::cout << "Serialized boolean: " << (value ? "true" : "false") << std::endl;
 		} else {
 			args_values += "\"" + String(arg["name"]) + "\": \"" + String(value) + "\",";
 			std::cout << "Primitive value: " << String(value).ascii() << std::endl;
