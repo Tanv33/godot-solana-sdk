@@ -1,22 +1,22 @@
-extends Node
-#
-## Dependencies and Constants
-var utils = load("res://common/utils.gd").new()
-var client: HoneyComb
-const MINT_SIZE :int = 82
-const MINT_ACCOUNT_SIZE :int= 165
+# extends Node
+# #
+# ## Dependencies and Constants
+# var utils = load("res://common/utils.gd").new()
+# #var client: HoneyComb
+# const MINT_SIZE :int = 82
+# const MINT_ACCOUNT_SIZE :int= 165
 
 
-# Define asset response structure
-var core: Dictionary
-var pnfts: Dictionary
-var cnfts: Dictionary
-var token22: Dictionary
+# # Define asset response structure
+# var core: Dictionary
+# var pnfts: Dictionary
+# var cnfts: Dictionary
+# var token22: Dictionary
 
-# New addresses
-var mint_keypair: Keypair = Keypair.new_random()
-var mint_account_keypair: Keypair = Keypair.new_random()
-var candy_machine_keypair: Keypair = Keypair.new_random()
+# # New addresses
+# var mint_keypair: Keypair = Keypair.new_random()
+# var mint_account_keypair: Keypair = Keypair.new_random()
+# var candy_machine_keypair: Keypair = Keypair.new_random()
 
 
 ## AssetCounts type definition
@@ -44,14 +44,14 @@ var candy_machine_keypair: Keypair = Keypair.new_random()
 
 
 # Mint MPL Core Collection
-func mint_mpl_core_collection(item_count: int, beneficiary: Pubkey, group: Pubkey):
-	if item_count <= 0:
-		return null
-
-	var asset_signers = []
-	for i in range(item_count):
-		asset_signers.append(Keypair.new_random())
-		
+#func mint_mpl_core_collection(item_count: int, beneficiary: Pubkey, group: Pubkey):
+	#if item_count <= 0:
+		#return null
+#
+	#var asset_signers = []
+	#for i in range(item_count):
+		#asset_signers.append(Keypair.new_random())
+		#
 	
 	# initialize_mint_collection()
 	
@@ -160,18 +160,18 @@ func mint_mpl_core_collection(item_count: int, beneficiary: Pubkey, group: Pubke
   
 
 #func mint_assets(count: Dictionary, beneficiery: Pubkey, collection: Pubkey = null, core_collection: Pubkey = null, tree: Pubkey = null):
-func mint_assets():
-	var response = {
-		"core": null,
-		"pnfts": null,
-		"cnfts": null,
-		"token22": null
-	}
+#func mint_assets():
+	#var response = {
+		#"core": null,
+		#"pnfts": null,
+		#"cnfts": null,
+		#"token22": null
+	#}
 
 	# Execute minting tasks in parallel and handle errors
 	#response.core = mint_mpl_core_collection(count.get("core"), beneficiery, core_collection)
 	#await initialize_mint_collection()
-	await initialize_candy_machine()
+	#await initialize_candy_machine()
 	
 	#response.pnfts = mint_mpl_tm_collection(count.get("pnfts"), beneficiery, collection).catch(resist_error)
 	#response.token22 = mint_token2022_collection(connection, admin_keypair, count.get("token22"), beneficiery, null).catch(resist_error)
@@ -196,108 +196,108 @@ func mint_assets():
 
 
 	# Function to handle errors and return null
-func resist_error(err):
-	# print("Error: ", err)
-	push_error("Failed in assets: %s" % err)
-	return null
+#func resist_error(err):
+	## print("Error: ", err)
+	#push_error("Failed in assets: %s" % err)
+	#return null
 
 
 
 
-func initialize_mint_collection():
-	var payer: Keypair = utils.user_keypair
-	# Ask our RPC server how much we need to transfer to our new mint account.
-	var mint_lamports = await minumum_balance_for_rent_extemtion(MINT_SIZE)
-	var mint_account_lamports = await minumum_balance_for_rent_extemtion(MINT_ACCOUNT_SIZE)
-	
-	# var token_account_keypair = Keypair.new_random()
-
-	
-	# Create a transaction
-	var tx := Transaction.new()
-	add_child(tx)
-	
-	# Append instructions. 
-	var ix: Instruction = SystemProgram.create_account(payer, mint_keypair, mint_lamports, MINT_SIZE, TokenProgram.get_pid())
-	tx.add_instruction(ix)
-	ix = TokenProgram.initialize_mint(mint_keypair, payer, payer, 0)
-	tx.add_instruction(ix)
-	ix = SystemProgram.create_account(payer, mint_account_keypair, mint_account_lamports, MINT_ACCOUNT_SIZE, TokenProgram.get_pid())
-	tx.add_instruction(ix)
-	ix = TokenProgram.initialize_account(mint_account_keypair, mint_keypair, payer)
-	tx.add_instruction(ix)
-	ix = TokenProgram.mint_to(mint_keypair, mint_account_keypair, payer, payer, 1)
-	tx.add_instruction(ix)
-	ix = MplTokenMetadata.create_metadata_account(mint_keypair, payer, payer, load("res://resources/new_create_meta_data_args.tres"),true)
-	tx.add_instruction(ix)
-	ix = MplTokenMetadata.update_metadata_account(MplTokenMetadata.new_associated_metadata_pubkey(mint_keypair), payer)
-	tx.add_instruction(ix)
-	ix = MplTokenMetadata.create_master_edition(mint_keypair, payer, payer, payer, 0)
-	tx.add_instruction(ix)
-	
-	tx.set_payer(payer)
-	
-	tx.update_latest_blockhash()
-
-	tx.sign_and_send()
-	var result = await tx.transaction_response_received
-	print("result: ",result)
-	assert(result.has("result"))
-	
-	utils.print_transaction_url(result.result)
-
-	await tx.confirmed
-
-
-func minumum_balance_for_rent_extemtion(data_size):
-	var solana_client = SolanaClient.new()
-	add_child(solana_client)
-	solana_client.get_minimum_balance_for_rent_extemption(data_size)
-	var result = await solana_client.http_response_received
-	assert(result.has("result"))
-	remove_child(solana_client)
-	return result['result']
-
-
-
-
-
-func initialize_candy_machine():
-	print("pohonch gaya....")
-	var payer: Keypair = utils.user_keypair
-	#var candy_machine_size = load("res://resources/new_candy_machine_data.tres").get_space_for_candy()
-	
-	# Create a transaction
-	var tx := Transaction.new()
-	add_child(tx)
-	
-	var info: CandyMachineData = load("res://resources/new_candy_machine_data.tres")
-	#info.token_standard = 0
-	info.items_available = 1
-	info.seller_fee_basis_points = 800
-	info.symbol = "GSS"
-	#info.creators = [payer]
-	info.config_line_setting = load("res://resources/new_config_line_setting.tres")
-	var candy_machine_size = info.get_space_for_candy()
-	var candy_machine_lamports = await minumum_balance_for_rent_extemtion(candy_machine_size)
-	var pid = MplCandyMachine.get_pid()
-	print(pid)
-	print(MplTokenMetadata.get_pid())
-	var ix: Instruction = SystemProgram.create_account(payer, candy_machine_keypair, candy_machine_lamports, candy_machine_size, pid)
-	
-	tx.add_instruction(ix)
-	ix = MplCandyMachine.initialize(payer, candy_machine_keypair, mint_keypair, info, true)
-	tx.add_instruction(ix)
-	
-	tx.set_payer(payer)
-	tx.update_latest_blockhash()
-
-	tx.sign_and_send()
-	var result = await tx.transaction_response_received
-	print("result: ",result)
-	assert(result.has("result"))
-	
-	utils.print_transaction_url(result.result)
-
-
-	await tx.confirmed
+#func initialize_mint_collection():
+	#var payer: Keypair = utils.user_keypair
+	## Ask our RPC server how much we need to transfer to our new mint account.
+	#var mint_lamports = await minumum_balance_for_rent_extemtion(MINT_SIZE)
+	#var mint_account_lamports = await minumum_balance_for_rent_extemtion(MINT_ACCOUNT_SIZE)
+	#
+	## var token_account_keypair = Keypair.new_random()
+#
+	#
+	## Create a transaction
+	#var tx := Transaction.new()
+	#add_child(tx)
+	#
+	## Append instructions. 
+	#var ix: Instruction = SystemProgram.create_account(payer, mint_keypair, mint_lamports, MINT_SIZE, TokenProgram.get_pid())
+	#tx.add_instruction(ix)
+	#ix = TokenProgram.initialize_mint(mint_keypair, payer, payer, 0)
+	#tx.add_instruction(ix)
+	#ix = SystemProgram.create_account(payer, mint_account_keypair, mint_account_lamports, MINT_ACCOUNT_SIZE, TokenProgram.get_pid())
+	#tx.add_instruction(ix)
+	#ix = TokenProgram.initialize_account(mint_account_keypair, mint_keypair, payer)
+	#tx.add_instruction(ix)
+	#ix = TokenProgram.mint_to(mint_keypair, mint_account_keypair, payer, payer, 1)
+	#tx.add_instruction(ix)
+	#ix = MplTokenMetadata.create_metadata_account(mint_keypair, payer, payer, load("res://resources/new_create_meta_data_args.tres"),true)
+	#tx.add_instruction(ix)
+	#ix = MplTokenMetadata.update_metadata_account(MplTokenMetadata.new_associated_metadata_pubkey(mint_keypair), payer)
+	#tx.add_instruction(ix)
+	#ix = MplTokenMetadata.create_master_edition(mint_keypair, payer, payer, payer, 0)
+	#tx.add_instruction(ix)
+	#
+	#tx.set_payer(payer)
+	#
+	#tx.update_latest_blockhash()
+#
+	#tx.sign_and_send()
+	#var result = await tx.transaction_response_received
+	#print("result: ",result)
+	#assert(result.has("result"))
+	#
+	#utils.print_transaction_url(result.result)
+#
+	#await tx.confirmed
+#
+#
+#func minumum_balance_for_rent_extemtion(data_size):
+	#var solana_client = SolanaClient.new()
+	#add_child(solana_client)
+	#solana_client.get_minimum_balance_for_rent_extemption(data_size)
+	#var result = await solana_client.http_response_received
+	#assert(result.has("result"))
+	#remove_child(solana_client)
+	#return result['result']
+#
+#
+#
+#
+#
+#func initialize_candy_machine():
+	#print("pohonch gaya....")
+	#var payer: Keypair = utils.user_keypair
+	##var candy_machine_size = load("res://resources/new_candy_machine_data.tres").get_space_for_candy()
+	#
+	## Create a transaction
+	#var tx := Transaction.new()
+	#add_child(tx)
+	#
+	#var info: CandyMachineData = load("res://resources/new_candy_machine_data.tres")
+	##info.token_standard = 0
+	#info.items_available = 1
+	#info.seller_fee_basis_points = 800
+	#info.symbol = "GSS"
+	##info.creators = [payer]
+	#info.config_line_setting = load("res://resources/new_config_line_setting.tres")
+	#var candy_machine_size = info.get_space_for_candy()
+	#var candy_machine_lamports = await minumum_balance_for_rent_extemtion(candy_machine_size)
+	#var pid = MplCandyMachine.get_pid()
+	#print(pid)
+	#print(MplTokenMetadata.get_pid())
+	#var ix: Instruction = SystemProgram.create_account(payer, candy_machine_keypair, candy_machine_lamports, candy_machine_size, pid)
+	#
+	#tx.add_instruction(ix)
+	#ix = MplCandyMachine.initialize(payer, candy_machine_keypair, mint_keypair, info, true)
+	#tx.add_instruction(ix)
+	#
+	#tx.set_payer(payer)
+	#tx.update_latest_blockhash()
+#
+	#tx.sign_and_send()
+	#var result = await tx.transaction_response_received
+	#print("result: ",result)
+	#assert(result.has("result"))
+	#
+	#utils.print_transaction_url(result.result)
+#
+#
+	#await tx.confirmed

@@ -209,11 +209,15 @@ public:
     static String get_createresources() { return "CreateResources"; }
     static String get_mintresources() { return "MintResources"; }
     static String get_burnresources() { return "BurnResources"; }
+    static String get_createfaucet() { return "CreateFaucet"; }
+    static String get_createrecipe() { return "CreateRecipe"; }
 
   static void _bind_methods() {
         ClassDB::bind_static_method("ResourceManagerPermissionInput", D_METHOD("get_createresources"), &ResourceManagerPermissionInput::get_createresources);
         ClassDB::bind_static_method("ResourceManagerPermissionInput", D_METHOD("get_mintresources"), &ResourceManagerPermissionInput::get_mintresources);
         ClassDB::bind_static_method("ResourceManagerPermissionInput", D_METHOD("get_burnresources"), &ResourceManagerPermissionInput::get_burnresources);
+        ClassDB::bind_static_method("ResourceManagerPermissionInput", D_METHOD("get_createfaucet"), &ResourceManagerPermissionInput::get_createfaucet);
+        ClassDB::bind_static_method("ResourceManagerPermissionInput", D_METHOD("get_createrecipe"), &ResourceManagerPermissionInput::get_createrecipe);
     }
 };
 

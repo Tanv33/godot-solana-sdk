@@ -30,8 +30,9 @@ func run_tests():
 func before_all():
 	add_child(utils)
 	client = HoneyComb.new()
+	client.set_honeycomb_url(utils.EGDE_CLIENT_PATH)
 	add_child(client)  # Add the client to the node tree
-	project = await utils.create_project()
+	project = await utils.create_project(client)
 
 # Test: Create or Load User with Profile
 func create_or_load_user_with_profile():
@@ -67,7 +68,7 @@ func create_or_load_user_with_profile():
 
 	# Step 3: Authorize the user if not already authorized
 	if access_token.is_empty():
-		await utils.initiate_auth_request(utils.user_keypair, utils.user_keypair.get_public_string())
+		await utils.initiate_auth_request(client, utils.user_keypair, utils.user_keypair.get_public_string())
 		access_token = utils.load_auth_token()
 		client.set_auth_token(access_token)
 		var headers = client.get_headers()

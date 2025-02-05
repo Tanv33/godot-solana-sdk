@@ -1,6 +1,3 @@
-[gd_resource type="TreeSetupConfig" load_steps=2 format=3 uid="uid://cwi8oxrlyh7kk"]
-
-[ext_resource type="AdvancedTreeConfig" uid="uid://btt52w2d0pp0k" path="res://resources/new_advanced_tree_config.tres" id="1_8xts1"]
+[gd_resource type="TreeSetupConfig" format=3 uid="uid://cwi8oxrlyh7kk"]
 
 [resource]
-advanced = ExtResource("1_8xts1")

@@ -369,6 +369,51 @@ Variant HoneyComb::authConfirm(String wallet, String signature){
 	return OK;
 }
 
+Variant HoneyComb::createTransferAssetsTransactions(PackedStringArray addresses, String to, PackedStringArray lutAddresses, int32_t computeUnitPrice){
+	if (pending) {
+		return ERR_BUSY;
+	}
+
+	add_arg("addresses", "[String!]", addresses, false);
+	add_arg("to", "String", Pubkey::string_from_variant(to), false);
+	if (lutAddresses != PackedStringArray()) {
+		add_arg("lutAddresses", "[String!]", lutAddresses, true);
+	}
+	if (computeUnitPrice != -1) {
+		add_arg("computeUnitPrice", "Int", computeUnitPrice, true);
+	}
+
+
+	method_name = "createTransferAssetsTransactions";
+
+
+	query_fields = "blockhash lastValidBlockHeight transactions";
+	send_query();
+	return OK;
+}
+
+Variant HoneyComb::createBurnAssetsTransactions(PackedStringArray addresses, PackedStringArray lutAddresses, int32_t computeUnitPrice){
+	if (pending) {
+		return ERR_BUSY;
+	}
+
+	add_arg("addresses", "[String!]", addresses, false);
+	if (lutAddresses != PackedStringArray()) {
+		add_arg("lutAddresses", "[String!]", lutAddresses, true);
+	}
+	if (computeUnitPrice != -1) {
+		add_arg("computeUnitPrice", "Int", computeUnitPrice, true);
+	}
+
+
+	method_name = "createBurnAssetsTransactions";
+
+
+	query_fields = "blockhash lastValidBlockHeight transactions";
+	send_query();
+	return OK;
+}
+
 Variant HoneyComb::findGlobal(String env){
 	if (pending) {
 		return ERR_BUSY;
@@ -2445,6 +2490,8 @@ void HoneyComb::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("sign_with_shadow_signer_and_send_bulk_transactions", "txs", "blockhash", "lastValidBlockHeight", "options"), &HoneyComb::signWithShadowSignerAndSendBulkTransactions, DEFVAL(Variant(nullptr)));
 	ClassDB::bind_method(D_METHOD("auth_request", "wallet", "useTx", "useRpc"), &HoneyComb::authRequest, DEFVAL(false), DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("auth_confirm", "wallet", "signature"), &HoneyComb::authConfirm);
+	ClassDB::bind_method(D_METHOD("create_transfer_assets_transactions", "addresses", "to", "lutAddresses", "computeUnitPrice"), &HoneyComb::createTransferAssetsTransactions, DEFVAL(PackedStringArray()), DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("create_burn_assets_transactions", "addresses", "lutAddresses", "computeUnitPrice"), &HoneyComb::createBurnAssetsTransactions, DEFVAL(PackedStringArray()), DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("find_global", "env"), &HoneyComb::findGlobal, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("find_projects", "addresses", "names", "authorities"), &HoneyComb::findProjects, DEFVAL(Array()), DEFVAL(PackedStringArray()), DEFVAL(Array()));
 	ClassDB::bind_method(D_METHOD("find_delegate_authority", "addresses", "delegates", "projects"), &HoneyComb::findDelegateAuthority, DEFVAL(Array()), DEFVAL(Array()), DEFVAL(Array()));

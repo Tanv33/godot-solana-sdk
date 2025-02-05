@@ -18,6 +18,7 @@ namespace godot
         Node *child = nullptr;
         HTTPRequest *api_request;
         Transaction *result_tx;
+        String honeycomb_url = "https://edge.test.honeycombprotocol.com/"; // Default URL
         PackedStringArray headers;
 
         String request;
@@ -36,6 +37,7 @@ namespace godot
         void query_response_function(const Dictionary &response);
         void query_error_function(const String &error_type, const String &raw_body);
         void set_auth_token(const String &p_token);
+        void set_honeycomb_url(const String &url);
         Variant process_wrapped_objects(const Variant &value);
         static void bind_non_changing_methods();
 

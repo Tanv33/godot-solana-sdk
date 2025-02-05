@@ -13,6 +13,7 @@ func _ready():
 
 func before_all():
 	add_child(utils)
+	set_honeycomb_url(utils.EGDE_CLIENT_PATH)
 	#await utils.create_or_find_wallet(utils.ADMIN_FILE_PATH, utils.AIRDROP_AMOUNT)
 	#await utils.create_or_find_wallet(utils.USER_FILE_PATH, utils.AIRDROP_AMOUNT)
 

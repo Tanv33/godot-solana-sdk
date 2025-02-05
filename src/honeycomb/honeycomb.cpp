@@ -23,6 +23,15 @@ void HoneyComb::query_response_callback(int result, int response_code, const Pac
 	query_response_function(method_response);
 }
 
+void HoneyComb::set_honeycomb_url(const String &url) {
+	if (url.is_empty()) {
+		honeycomb_url = "https://edge.test.honeycombprotocol.com/"; // Reset to default
+	} else {
+		honeycomb_url = url;
+	}
+	std::cout << "HoneyComb URL set to: " << honeycomb_url.ascii() << std::endl;
+}
+
 // void HoneyComb::query_response_callback(int result, int response_code, const PackedStringArray &headers, const PackedByteArray &body)
 // {
 //   Dictionary response = JSON::parse_string(body.get_string_from_ascii());
@@ -118,7 +127,8 @@ void HoneyComb::query_error_function(const String &error_type, const String &raw
 }
 
 void HoneyComb::send_query() {
-	const String HONEYCOMB_URL = "https://edge.test.honeycombprotocol.com/";
+	const String HONEYCOMB_URL = honeycomb_url;
+	std::cout << "HoneyComb URL = " << HONEYCOMB_URL.ascii() << std::endl;
 
 	// Set up the callback for handling the response
 	Callable callback = Callable(this, "query_response_callback");
@@ -174,6 +184,12 @@ String HoneyComb::build() {
 		std::cout << "Value type: " << String(value).ascii() << std::endl;
 
 		// Updated Serialization Logic
+		if (value.get_type() == Variant::ARRAY) {
+			// Fix for the `order` field: Directly append JSON array without wrapping in quotes
+			args_values += "\"" + String(arg["name"]) + "\": " + JSON::stringify(value) + ",";
+			std::cout << "Serialized array: " << JSON::stringify(value).ascii() << std::endl;
+		}
+		std::cout << String(value.get_type_name(value.get_type())).ascii() << std::endl;
 		if (value.get_type() == Variant::OBJECT) {
 			Object *obj = Object::cast_to<Object>(value);
 			if (obj && obj->has_method("to_dict")) {
@@ -184,7 +200,7 @@ String HoneyComb::build() {
 				args_values += "\"" + String(arg["name"]) + "\": " + JSON::stringify(value) + ",";
 				std::cout << "Non-serializable object, added as stringified value." << std::endl;
 			}
-		} else if (value.get_type() == Variant::DICTIONARY || value.get_type() == Variant::ARRAY) {
+		} else if (value.get_type() == Variant::DICTIONARY || value.get_type() == Variant::ARRAY || value.get_type() == Variant::PACKED_STRING_ARRAY) {
 			Variant processed_value = process_wrapped_objects(value);
 			args_values += "\"" + String(arg["name"]) + "\": " + JSON::stringify(processed_value) + ",";
 			std::cout << "Serialized array/dictionary: " << JSON::stringify(processed_value).ascii() << std::endl;
@@ -262,6 +278,7 @@ void HoneyComb::bind_non_changing_methods() {
 	// ClassDB::bind_method(D_METHOD("query_response_function", "response"), &HoneyComb::query_response_function);
 	ClassDB::bind_method(D_METHOD("set_auth_token", "token"), &HoneyComb::set_auth_token);
 	ClassDB::bind_method(D_METHOD("get_headers"), &HoneyComb::get_headers);
+	ClassDB::bind_method(D_METHOD("set_honeycomb_url", "url"), &HoneyComb::set_honeycomb_url);
 }
 
 HoneyComb::~HoneyComb() {

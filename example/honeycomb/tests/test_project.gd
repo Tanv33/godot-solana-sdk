@@ -19,6 +19,7 @@ func execute():
 func before_all():
 	add_child(utils)
 	client = HoneyComb.new()
+	client.set_honeycomb_url(utils.EGDE_CLIENT_PATH)
 	add_child(client)  # Add the client to the node tree
 
 # Run all test cases sequentially
@@ -34,13 +35,13 @@ func run_tests():
 func create_or_load_project():
 	print("Running test: create_or_load_project")
 	var projectObj = await _create_project(utils.admin_keypair.get_public_string(), utils.admin_keypair.get_public_string())
-	print("Project:", projectObj.project)
+	print("Project:", projectObj)
 
 	client.find_projects([projectObj.project])
 	var project_response = await client.query_response_received
 	project = project_response.project[0]  # Retrieve the first project
 
-	# Validate the project creation
+	# Validate the project creation	
 	assert(project != null, "Project should be created successfully.")
 	if project.has("subsidyFees"):
 		var tx = utils.transfer_lamports(projectObj.project, utils.admin_keypair, 1)
@@ -125,8 +126,8 @@ func create_or_load_badge_criteria():
 	var badge_criteria_input: CreateBadgeCriteriaInput = load("res://resources/new_create_badge_criteria_input.tres")
 	badge_criteria_input.authority = utils.admin_keypair.get_public_string()
 	badge_criteria_input.projectAddress = project.address
-	badge_criteria_input.endTime = Time.get_unix_time_from_system() + 60 * 60 * 24 * 7
-	badge_criteria_input.startTime = Time.get_unix_time_from_system()
+	badge_criteria_input.endTime = int(Time.get_unix_time_from_system() + 60 * 60 * 24 * 7)
+	badge_criteria_input.startTime = int(Time.get_unix_time_from_system())
 	badge_criteria_input.badgeIndex = 0
 	badge_criteria_input.payer = utils.admin_keypair.get_public_string()
 	badge_criteria_input.condition = BadgesCondition.get_public()
@@ -154,8 +155,8 @@ func update_badge_criteria():
 	var badge_criteria_input: UpdateBadgeCriteriaInput = load("res://resources/new_update_badge_criteria_input.tres")
 	badge_criteria_input.authority = utils.admin_keypair.get_public_string()
 	badge_criteria_input.projectAddress = project.address
-	badge_criteria_input.endTime = Time.get_unix_time_from_system() + 60 * 60 * 24 * 7
-	badge_criteria_input.startTime = Time.get_unix_time_from_system()
+	badge_criteria_input.endTime = int(Time.get_unix_time_from_system() + 60 * 60 * 24 * 7)
+	badge_criteria_input.startTime = int(Time.get_unix_time_from_system())
 	badge_criteria_input.criteriaIndex = 0
 	badge_criteria_input.payer = utils.admin_keypair.get_public_string()
 	badge_criteria_input.condition = BadgesCondition.get_public()
@@ -193,9 +194,10 @@ func _create_project(authority: String, owner_address: String):
 	if not project_data.is_empty():
 		var encoded_tx = utils.extract_transaction(project_data.createCreateProjectTransaction)
 		if not encoded_tx.is_empty():
-			await utils.process_transaction(encoded_tx, [utils.admin_keypair] as Array[Keypair])
+			var sd = await utils.process_transaction(encoded_tx, [utils.admin_keypair] as Array[Keypair])
+			print("cha", sd)
+			return project_data.createCreateProjectTransaction
 
-	return project_data.createCreateProjectTransaction
 
 func create_project(authority: String, project_name: String, description: String = "", tags: Array = [], category = null, is_private: bool = false, owner_address: String = ""):
 	client.create_create_project_transaction(

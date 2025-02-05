@@ -1,17 +1,18 @@
-extends HoneyComb
+extends Node
 
 var admin_keypair: Keypair = Keypair.new_from_file("res://admin.json")
 var user_keypair: Keypair = Keypair.new_from_file("res://user.json")
 const AUTH_TOKEN_FILE_PATH = "res://auth_token.txt"
 const LAMPORTS_PER_SOL = 1_000_000_000
-const AIRDROP_AMOUNT = 3 * LAMPORTS_PER_SOL
+const AIRDROP_AMOUNT = 30000 * LAMPORTS_PER_SOL
 const ADMIN_FILE_PATH = "res://admin.json"
 const USER_FILE_PATH = "res://user.json"
-
+const RPC_PATH = "https://rpc.solana.studio"
+const EGDE_CLIENT_PATH = "http://localhost:4000"
 
 func print_transaction_url(signature: String):
 	if signature:
-		print("Transaction URL: https://solscan.io/tx/%s?cluster=custom&customUrl=https://rpc.test.honeycombprotocol.com" % signature)
+		print("Transaction URL: https://solscan.io/tx/%s?cluster=custom&customUrl=%s" % [signature, RPC_PATH])
 
 func extract_transaction(response: Dictionary):
 	if response.has("tx"):
@@ -45,26 +46,26 @@ func transfer_lamports(receiver: String, payer: Keypair, amount: int):
 	print("Transaction successfully sent.")
 	return tx
 
-func initiate_auth_request(payerKeypair: Keypair,wallet: String, use_tx: bool = false, use_rpc: String = ""):
-	auth_request(wallet, use_tx, use_rpc)  # Call the SDK method
-	var auth_response = await query_response_received
+func initiate_auth_request(client: HoneyComb, payerKeypair: Keypair,wallet: String, use_tx: bool = false, use_rpc: String = ""):
+	client.auth_request(wallet, use_tx, use_rpc)  # Call the SDK method
+	var auth_response = await client.query_response_received
 	if auth_response.has("authRequest"):
 		#print("Authentication message: ", auth_response.authRequest)
 		var message: PackedByteArray = String(auth_response.authRequest.message).to_ascii_buffer()
 		var sig: PackedByteArray = payerKeypair.sign_message(message)
 		assert(payerKeypair.verify_signature(sig, message))
 		var signature = SolanaUtils.bs58_encode(sig)
-		var res = await confirm_authentication(wallet, signature) 
+		var res = await confirm_authentication(client, wallet, signature) 
 		return res
 	else:
 		print("Failed to initiate auth request.")
 		return {}
 
 # Wrapper Function to Call auth_confirm from SDK and Handle the Response
-func confirm_authentication(wallet: String, signature: String):
-	auth_confirm(wallet, signature)  # Call the SDK method
+func confirm_authentication(client: HoneyComb, wallet: String, signature: String):
+	client.auth_confirm(wallet, signature)  # Call the SDK method
 	# Process the SDK response
-	var confirm_response = await query_response_received
+	var confirm_response = await client.query_response_received
 	if confirm_response.has("authConfirm"):
 		var auth_token = confirm_response.authConfirm.accessToken
 		print("Authentication successful. Token: ", auth_token)
@@ -103,20 +104,24 @@ func PASS(unique_identifier: int):
 
 # Utility function to process a transaction
 func process_transaction(encoded_transaction: String, signers: Array[Keypair]):
-	var tx = await send_transaction(encoded_transaction, signers)
+	var tx = await send_transaction_func(encoded_transaction, signers)
 	if not tx:
 		print("Failed to create transaction")
 		return
 
 	print("Transaction sent, awaiting response...")
 	var response = await tx.transaction_response_received
+	# print("responseresponse: ",response)
+	#await tx.finalized()
 	tx.queue_free()
 
 	if response:
 		print_transaction_url(response.result if response.has("result") else "")
+	
+	return response
 
 # Utility function to send a transaction
-func send_transaction(encoded_transaction: String, signers: Array[Keypair]):
+func send_transaction_func(encoded_transaction: String, signers: Array[Keypair]):
 	var decoded_tx = SolanaUtils.bs58_decode(encoded_transaction)
 	var transaction = Transaction.new_from_bytes(decoded_tx)
 	add_child(transaction)
@@ -132,16 +137,17 @@ func send_transaction(encoded_transaction: String, signers: Array[Keypair]):
 
 # Function to create a project
 func create_project(
+	client: HoneyComb,
 	project_name: String = "Test Project",
-	authority: String = admin_keypair.get_public_string(),
-	payer: String = admin_keypair.get_public_string(),
+	authority: String = user_keypair.get_public_string(),
+	payer: String = user_keypair.get_public_string(),
 	subsidize_fees: bool = true,
 	create_profiles_tree: bool = true,
 	create_badging_criteria: bool = true
 ):
 	print("Creating project...")
 	var project: Dictionary
-	create_create_project_transaction(
+	client.create_create_project_transaction(
 		authority,
 		project_name,
 		"",  # Description
@@ -150,15 +156,15 @@ func create_project(
 		false,  # Is private
 		payer
 	)
-	var response = await query_response_received
+	var response = await client.query_response_received
 	var project_address = response.createCreateProjectTransaction.project
 
 	var encoded_tx = extract_transaction(response.createCreateProjectTransaction)
 	if not encoded_tx.is_empty():
-		await process_transaction(encoded_tx, [admin_keypair])
+		await process_transaction(encoded_tx, [user_keypair])
 
-	find_projects([project_address])
-	var project_resp = await query_response_received
+	client.find_projects([project_address])
+	var project_resp = await client.query_response_received
 	project = project_resp.project[0] if project_resp.project.size() > 0 else {}
 
 	assert(project != null, "Project should be created successfully.")
@@ -167,7 +173,7 @@ func create_project(
 		print("Funding project for subsidy...")
 		var tx = transfer_lamports(
 			project_address,
-			admin_keypair,
+			user_keypair,
 			1_000_000_000  # 1 SOL
 		)
 		var fund_response = await tx.transaction_response_received
@@ -176,19 +182,23 @@ func create_project(
 
 	if create_profiles_tree:
 		print("Creating profile trees...")
-		var tree_config = load("res://resources/new_tree_setup_config.tres")
-		create_create_profiles_tree_transaction(
+		var tree_config: TreeSetupConfig = load("res://resources/new_tree_setup_config.tres")
+		var basic_tree_config: BasicTreeConfig  = load("res://resources/new_basic_tree_config.tres")
+		basic_tree_config.numAssets = 100000
+		tree_config.basic = basic_tree_config
+		
+		client.create_create_profiles_tree_transaction(
 			tree_config,
 			project_address,
 			payer,
 		)
-		var tree_response = await query_response_received
+		var tree_response = await client.query_response_received
 		var en_tx = extract_transaction(tree_response.createCreateProfilesTreeTransaction)
 		if not en_tx.is_empty():
-			await process_transaction(en_tx, [admin_keypair])
+			await process_transaction(en_tx, [user_keypair])
 
-		find_projects([project_address])
-		var project_response = await query_response_received
+		client.find_projects([project_address])
+		var project_response = await client.query_response_received
 		project = project_response.project[0]
 		print("project: ", project)
 		assert(
@@ -199,21 +209,21 @@ func create_project(
 	if create_badging_criteria:
 		print("Initializing badge criteria...")
 		var badge_criteria_input: CreateBadgeCriteriaInput = load("res://resources/new_create_badge_criteria_input.tres")
-		badge_criteria_input.authority = admin_keypair.get_public_string()
+		badge_criteria_input.authority = user_keypair.get_public_string()
 		badge_criteria_input.projectAddress = project.address
-		badge_criteria_input.endTime = Time.get_unix_time_from_system() + 60 * 60 * 24 * 7
-		badge_criteria_input.startTime = Time.get_unix_time_from_system()
+		badge_criteria_input.endTime = int(Time.get_unix_time_from_system() + 60 * 60 * 24 * 7)
+		badge_criteria_input.startTime = int(Time.get_unix_time_from_system())
 		badge_criteria_input.badgeIndex = 0
-		badge_criteria_input.payer = admin_keypair.get_public_string()
+		badge_criteria_input.payer = user_keypair.get_public_string()
 		badge_criteria_input.condition = BadgesCondition.get_public()
-		create_initialize_badge_criteria_transaction(badge_criteria_input)
-		var badge_response = await query_response_received
+		client.create_initialize_badge_criteria_transaction(badge_criteria_input)
+		var badge_response = await client.query_response_received
 		var en_tx = extract_transaction(badge_response.createInitializeBadgeCriteriaTransaction)
 		if not en_tx.is_empty():
-			await process_transaction(en_tx, [admin_keypair])
+			await process_transaction(en_tx, [user_keypair])
 
-		find_projects([project_address])
-		var project_response = await query_response_received
+		client.find_projects([project_address])
+		var project_response = await client.query_response_received
 		project = project_response.project[0]
 	return project
 
@@ -238,8 +248,8 @@ func create_keypair_and_airdrop(filename: String, amount: int):
 		#return null
 		#
 	 ##Request airdrop
-	#if not await request_airdrop_func(keypair.get_public_string(), amount):
-		#return null
+	if not await request_airdrop_func(keypair.get_public_string(), amount):
+		return null
 		
 	return keypair
 
@@ -250,11 +260,12 @@ func request_airdrop_func(wallet: String, amount: int):
 	add_child(solana_client)
 	solana_client.request_airdrop(wallet, amount)
 	var response = await solana_client.http_response_received
+	#print("response: ",response)
 	if not response or not response.has("result"):
 		print("Failed to receive airdrop")
 		return false
 	else:
-		print("Failed to receive airdrop")
+		print("Airdrop success")
 		print_transaction_url(response.result)
 		return true
 
@@ -268,3 +279,13 @@ func save_keypair(keypair: Keypair, filename: String):
 		return false
 	file_check.close()
 	return true
+
+
+
+# Helper function to generate random ticker ID
+func make_id(length: int) -> String:
+	var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	var result = ""
+	for i in range(length):
+		result += chars[randi() % chars.length()]
+	return result

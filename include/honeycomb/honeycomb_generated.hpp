@@ -7,6 +7,8 @@
 	Variant signWithShadowSignerAndSendBulkTransactions(Array txs, String blockhash, int32_t lastValidBlockHeight, Variant options = Variant(nullptr));\
 	Variant authRequest(String wallet, bool useTx = false, String useRpc = "");\
 	Variant authConfirm(String wallet, String signature);\
+	Variant createTransferAssetsTransactions(PackedStringArray addresses, String to, PackedStringArray lutAddresses = PackedStringArray(), int32_t computeUnitPrice = -1);\
+	Variant createBurnAssetsTransactions(PackedStringArray addresses, PackedStringArray lutAddresses = PackedStringArray(), int32_t computeUnitPrice = -1);\
 	Variant findGlobal(String env = "");\
 	Variant findProjects(Array addresses = Array(), PackedStringArray names = PackedStringArray(), Array authorities = Array());\
 	Variant findDelegateAuthority(Array addresses = Array(), Array delegates = Array(), Array projects = Array());\
