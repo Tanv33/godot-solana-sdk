@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1745499345973,
+  "lastUpdate": 1745586425360,
   "repoUrl": "https://github.com/Tanv33/godot-solana-sdk",
   "entries": {
     "Benchmark": [
@@ -144,6 +144,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "Simple Transaction Performance Index",
             "value": 0.366438356164384,
+            "unit": "Percent"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "axel.benjaminsson@live.se",
+            "name": "Axel",
+            "username": "Virus-Axel"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3867ffcf1c3fc79ba358f3f33b8d51309c3790ae",
+          "message": "Merge pull request #363 from Virus-Axel/bugfix/optimize_workflows\n\nRevert run example workflow but optimized",
+          "timestamp": "2025-04-08T21:06:52+02:00",
+          "tree_id": "668bf4ed4f602c8337e14b59ce30e7ca1057ae72",
+          "url": "https://github.com/Tanv33/godot-solana-sdk/commit/3867ffcf1c3fc79ba358f3f33b8d51309c3790ae"
+        },
+        "date": 1745586424903,
+        "tool": "customBiggerIsBetter",
+        "benches": [
+          {
+            "name": "Simple Transaction Performance Index",
+            "value": 0.393835616438356,
             "unit": "Percent"
           }
         ]
