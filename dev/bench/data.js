@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1746013224446,
+  "lastUpdate": 1746616109944,
   "repoUrl": "https://github.com/Tanv33/godot-solana-sdk",
   "entries": {
     "Benchmark": [
@@ -202,6 +202,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "Simple Transaction Performance Index",
             "value": 0.376712328767123,
+            "unit": "Percent"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tanveer.khan2692000@gmail.com",
+            "name": "tanv33",
+            "username": "Tanv33"
+          },
+          "committer": {
+            "email": "tanveer.khan2692000@gmail.com",
+            "name": "tanv33",
+            "username": "Tanv33"
+          },
+          "distinct": true,
+          "id": "ef6f36ec2fa1d52fdd5c6661265829eb2a7fd395",
+          "message": "Manual breifing removed. Briefing added using generator",
+          "timestamp": "2025-05-07T15:59:26+05:00",
+          "tree_id": "6bff00632b245228bb643d2c056b65da767bcef7",
+          "url": "https://github.com/Tanv33/godot-solana-sdk/commit/ef6f36ec2fa1d52fdd5c6661265829eb2a7fd395"
+        },
+        "date": 1746616108696,
+        "tool": "customBiggerIsBetter",
+        "benches": [
+          {
+            "name": "Simple Transaction Performance Index",
+            "value": 0.373287671232877,
             "unit": "Percent"
           }
         ]
