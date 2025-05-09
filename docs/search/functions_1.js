@@ -12,5 +12,7 @@ var searchData=
   ['addresslookuptable_9',['AddressLookupTable',['../classgodot_1_1_address_lookup_table.html#a3a9fac5220089a407512152fbed7e6b8',1,'godot::AddressLookupTable']]],
   ['append_5fmeta_10',['append_meta',['../classgodot_1_1_instruction.html#a7963f7cc88dd69ba91c8dcb43d1c2f5f',1,'godot::Instruction']]],
   ['assemble_5furl_11',['assemble_url',['../classgodot_1_1_solana_client.html#a6423b28c6c15993b1645bc41a0509b64',1,'godot::SolanaClient']]],
-  ['asynchronous_5frequest_12',['asynchronous_request',['../classgodot_1_1_rpc_multi_http_request_client.html#a7cc653690e8c6d68f285ac31f281bfbf',1,'godot::RpcMultiHttpRequestClient::asynchronous_request()'],['../classgodot_1_1_rpc_single_http_request_client.html#a73033b0aecbfcdb942d9063d6202f8ae',1,'godot::RpcSingleHttpRequestClient::asynchronous_request()']]]
+  ['asynchronous_5frequest_12',['asynchronous_request',['../classgodot_1_1_rpc_multi_http_request_client.html#a7cc653690e8c6d68f285ac31f281bfbf',1,'godot::RpcMultiHttpRequestClient::asynchronous_request()'],['../classgodot_1_1_rpc_single_http_request_client.html#a73033b0aecbfcdb942d9063d6202f8ae',1,'godot::RpcSingleHttpRequestClient::asynchronous_request()']]],
+  ['authconfirm_13',['authConfirm',['../classgodot_1_1_honey_comb.html#a34e5b121f3c0a81ebc80c1cb91076d58',1,'godot::HoneyComb']]],
+  ['authrequest_14',['authRequest',['../classgodot_1_1_honey_comb.html#a2151643fb2946065b801f739f078681e',1,'godot::HoneyComb']]]
 ];
