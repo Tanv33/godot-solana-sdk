@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1746793460426,
+  "lastUpdate": 1752480037249,
   "repoUrl": "https://github.com/Tanv33/godot-solana-sdk",
   "entries": {
     "Benchmark": [
@@ -289,6 +289,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "Simple Transaction Performance Index",
             "value": 0.374570446735395,
+            "unit": "Percent"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tanveer.khan2692000@gmail.com",
+            "name": "tanv33",
+            "username": "Tanv33"
+          },
+          "committer": {
+            "email": "tanveer.khan2692000@gmail.com",
+            "name": "tanv33",
+            "username": "Tanv33"
+          },
+          "distinct": true,
+          "id": "43e6d44c23bb6646e27db19568361362cd103450",
+          "message": "bind_method added again and a comment added",
+          "timestamp": "2025-07-14T12:51:47+05:00",
+          "tree_id": "1ffcbf4d9d5c36d4edd64676a9f25e52e6b79a86",
+          "url": "https://github.com/Tanv33/godot-solana-sdk/commit/43e6d44c23bb6646e27db19568361362cd103450"
+        },
+        "date": 1752480035761,
+        "tool": "customBiggerIsBetter",
+        "benches": [
+          {
+            "name": "Simple Transaction Performance Index",
+            "value": 0.366438356164384,
             "unit": "Percent"
           }
         ]
